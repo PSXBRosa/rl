@@ -87,9 +87,6 @@ class MeanActionSelector(Transform):
         action_mean = tensordict.get((self._action_key, "mean"), None)
         if action_mean is not None:
             tensordict.set(self._action_key, action_mean)
-        obs_mean = tensordict.get((self._observation_key, "mean"), None)
-        if obs_mean is not None:
-            tensordict.set(self._observation_key, obs_mean)
         return tensordict
 
     def transform_observation_spec(self, observation_spec):

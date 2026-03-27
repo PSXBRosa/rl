@@ -75,7 +75,6 @@ class GPWorldModel(nn.Module):
         from botorch.fit import fit_gpytorch_mll
         from botorch.models import ModelListGP, SingleTaskGP
         from gpytorch.kernels import RBFKernel, ScaleKernel
-        from gpytorch.means import ZeroMean
         from gpytorch.mlls import SumMarginalLogLikelihood
         from gpytorch.priors import GammaPrior
 
@@ -94,18 +93,13 @@ class GPWorldModel(nn.Module):
 
             covar_module = ScaleKernel(
                 RBFKernel(
-                    ard_num_dims=self.input_dim,
-                    lengthscale_prior=GammaPrior(1.1, 0.1),
+                    ard_num_dims=self.input_dim, lengthscale_prior=GammaPrior(1.1, 0.1)
                 ),
                 outputscale_prior=GammaPrior(1.5, 0.5),
             )
 
             gp = SingleTaskGP(
-                train_X=train_x,
-                train_Y=train_y,
-                covar_module=covar_module,
-                mean_module=ZeroMean(),
-                outcome_transform=None,
+                train_X=train_x, train_Y=train_y, covar_module=covar_module
             )
             gp.likelihood.noise_covar.register_prior(
                 "noise_prior", GammaPrior(1.2, 0.05), "noise"
@@ -201,10 +195,6 @@ class GPWorldModel(nn.Module):
 
     def freeze_and_detach(self) -> None:
         """Freezes the model parameters so they are not updated during policy optimisation."""
-        if self.model_list is not None:
-            self.model_list.eval()
-            for param in self.model_list.parameters():
-                param.requires_grad_(False)
 
     def uncertain_forward(
         self, action: TensorDictBase, obs: TensorDictBase
@@ -264,7 +254,7 @@ class GPWorldModel(nn.Module):
         _, log_det_B = torch.linalg.slogdet(B_mat)
         c = variances.squeeze(1).unsqueeze(0) * torch.exp(-0.5 * log_det_B)
 
-        pred_mean = torch.sum(lb, dim=-1) * c
+        pred_mean = torch.sum(lb, dim=-1) * c.squeeze(0)
 
         t_inv_L = t @ inv_L.unsqueeze(0)
 
@@ -331,7 +321,7 @@ class GPWorldModel(nn.Module):
                     invK_Q = torch.matmul(inv_K[a].unsqueeze(0), Q_ab)
                     trace_val = torch.diagonal(invK_Q, dim1=-2, dim2=-1).sum(-1)
 
-                    pred_cov[:, a, a] += variances[a] - trace_val
+                    pred_cov[:, a, a] += variances[a] - trace_val + noises[a]
 
         outer_mean = torch.bmm(pred_mean.unsqueeze(-1), pred_mean.unsqueeze(-2))
         pred_cov = pred_cov - outer_mean
