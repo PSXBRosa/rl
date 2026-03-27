@@ -18648,17 +18648,10 @@ class TestImaginedEnv:
 
     def test_step(self):
         obs_dim, action_dim = 4, 1
-        next_observation_key = (
-            "next_observation"  # ("next", "observation") could also be a possibility
-        )
         wm = self._make_dummy_world_model(obs_dim, action_dim)
         base_env = self._make_base_env(obs_dim, action_dim)
 
-        env = ImaginedEnv(
-            world_model_module=wm,
-            base_env=base_env,
-            next_observation_key=next_observation_key,
-        )
+        env = ImaginedEnv(world_model_module=wm, base_env=base_env)
 
         td = TensorDict(
             {
@@ -18791,7 +18784,7 @@ class TestGPWorldModel:
         model = GPWorldModel(obs_dim=4, action_dim=1)
         assert model.obs_dim == 4
         assert model.action_dim == 1
-        assert model.state_action_dim == 5
+        assert model.input_dim == 5
 
     def test_fit_and_deterministic_forward(self):
         from torchrl.modules.models.gp import GPWorldModel
@@ -18800,9 +18793,9 @@ class TestGPWorldModel:
         model = GPWorldModel(obs_dim=obs_dim, action_dim=action_dim)
 
         n_samples = 20
-        obs = torch.randn(n_samples, obs_dim).double()
-        action = torch.randn(n_samples, action_dim).double()
-        next_obs = obs + 0.1 * torch.randn(n_samples, obs_dim).double()
+        obs = torch.randn(n_samples, obs_dim)
+        action = torch.randn(n_samples, action_dim)
+        next_obs = obs + 0.1 * torch.randn(n_samples, obs_dim)
 
         dataset = TensorDict(
             {
@@ -18814,20 +18807,15 @@ class TestGPWorldModel:
         )
 
         model.fit(dataset)
-        model.eval()
+        model.freeze_and_detach()
 
-        td = TensorDict(
-            {
-                ("observation", "mean"): torch.randn(3, obs_dim),
-                ("action", "mean"): torch.randn(3, action_dim),
-            },
-            batch_size=[3],
-        )
+        test_obs = TensorDict({"mean": torch.randn(3, obs_dim)}, batch_size=[3])
+        test_action = TensorDict({"mean": torch.randn(3, action_dim)}, batch_size=[3])
 
-        forward_td = model.deterministic_forward(td)
+        mean, var = model.deterministic_forward(test_action, test_obs)
 
-        assert forward_td[("next", "observation", "mean")].shape == (3, obs_dim)
-        assert forward_td[("next", "observation", "var")].shape == (3, obs_dim, obs_dim)
+        assert mean.shape == (3, obs_dim)
+        assert var.shape == (3, obs_dim, obs_dim)
 
     def test_uncertain_forward(self):
         from torchrl.modules.models.gp import GPWorldModel
@@ -18851,38 +18839,35 @@ class TestGPWorldModel:
 
         model.double()
         model.fit(dataset)
-        model.eval()
+        model.freeze_and_detach()
 
         batch = 2
-        td = TensorDict(
+        test_obs = TensorDict(
             {
-                "observation": {
-                    "mean": torch.randn(batch, obs_dim, dtype=torch.float64),
-                    "var": torch.eye(obs_dim, dtype=torch.float64)
-                    .unsqueeze(0)
-                    .expand(batch, -1, -1)
-                    * 0.01,
-                },
-                "action": {
-                    "mean": torch.randn(batch, action_dim, dtype=torch.float64),
-                    "var": torch.eye(action_dim, dtype=torch.float64)
-                    .unsqueeze(0)
-                    .expand(batch, -1, -1)
-                    * 0.01,
-                    "cross_covariance": torch.zeros(
-                        batch, obs_dim, action_dim, dtype=torch.float64
-                    ),
-                },
+                "mean": torch.randn(batch, obs_dim, dtype=torch.float64),
+                "var": torch.eye(obs_dim, dtype=torch.float64)
+                .unsqueeze(0)
+                .expand(batch, -1, -1)
+                * 0.01,
+            },
+            batch_size=[batch],
+        )
+        test_action = TensorDict(
+            {
+                "mean": torch.randn(batch, action_dim, dtype=torch.float64),
+                "var": torch.eye(action_dim, dtype=torch.float64)
+                .unsqueeze(0)
+                .expand(batch, -1, -1)
+                * 0.01,
+                "cross_covariance": torch.zeros(
+                    batch, obs_dim, action_dim, dtype=torch.float64
+                ),
             },
             batch_size=[batch],
         )
 
-        forward_td = model.uncertain_forward(td)
+        mean, var = model.uncertain_forward(test_action, test_obs)
 
-        mean, var = (
-            forward_td[("next", "observation", "mean")],
-            forward_td[("next", "observation", "var")],
-        )
         assert mean.shape == (batch, obs_dim)
         assert var.shape == (batch, obs_dim, obs_dim)
 
@@ -18895,9 +18880,9 @@ class TestGPWorldModel:
         model = GPWorldModel(obs_dim=obs_dim, action_dim=action_dim)
 
         n_samples = 20
-        obs = torch.randn(n_samples, obs_dim).double()
-        action = torch.randn(n_samples, action_dim).double()
-        next_obs = obs + 0.1 * torch.randn(n_samples, obs_dim).double()
+        obs = torch.randn(n_samples, obs_dim)
+        action = torch.randn(n_samples, action_dim)
+        next_obs = obs + 0.1 * torch.randn(n_samples, obs_dim)
 
         dataset = TensorDict(
             {
@@ -18909,33 +18894,29 @@ class TestGPWorldModel:
         )
 
         model.fit(dataset)
-        model.eval()
+        model.freeze_and_detach()
 
-        batch = 2
-        td = TensorDict(
+        det_obs = TensorDict({"mean": torch.randn(2, obs_dim)}, batch_size=[2])
+        det_action = TensorDict({"mean": torch.randn(2, action_dim)}, batch_size=[2])
+        mean, var = model(det_action, det_obs)
+        assert mean.shape == (2, obs_dim)
+
+        unc_obs = TensorDict(
             {
-                "observation": {
-                    "mean": torch.randn(batch, obs_dim, dtype=torch.float64),
-                    "var": torch.eye(obs_dim, dtype=torch.float64)
-                    .unsqueeze(0)
-                    .expand(batch, -1, -1)
-                    * 0.01,
-                },
-                "action": {
-                    "mean": torch.randn(batch, action_dim, dtype=torch.float64),
-                    "var": torch.eye(action_dim, dtype=torch.float64)
-                    .unsqueeze(0)
-                    .expand(batch, -1, -1)
-                    * 0.01,
-                    "cross_covariance": torch.zeros(
-                        batch, obs_dim, action_dim, dtype=torch.float64
-                    ),
-                },
+                "mean": torch.randn(2, obs_dim),
+                "var": torch.eye(obs_dim).unsqueeze(0).expand(2, -1, -1) * 0.1,
             },
-            batch_size=[batch],
+            batch_size=[2],
         )
-        forward_td = model(td)
-        mean = forward_td[("next", "observation", "mean")]
+        unc_action = TensorDict(
+            {
+                "mean": torch.randn(2, action_dim),
+                "var": torch.eye(action_dim).unsqueeze(0).expand(2, -1, -1) * 0.01,
+                "cross_covariance": torch.zeros(2, obs_dim, action_dim),
+            },
+            batch_size=[2],
+        )
+        mean, var = model(unc_action, unc_obs)
         assert mean.shape == (2, obs_dim)
 
 
