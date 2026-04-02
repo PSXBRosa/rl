@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-04-01T18:52:17.597385+00:00",
+  "last_updated": "2026-04-02T07:22:38.275157+00:00",
   "stats": {
     "last_7_days": {
       "days": 7,
       "runs_with_data": 7,
       "total_workflow_runs": 84,
       "total_success": 63,
-      "total_failure": 5,
+      "total_failure": 4,
       "success_rate": 75.0
     },
     "last_30_days": {
@@ -19,6 +19,119 @@
     }
   },
   "history": [
+    {
+      "date": "2026-04-02",
+      "orchestrator_ran": true,
+      "orchestrator_status": "pending",
+      "orchestrator_url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023",
+      "orchestrator_run_id": 23889027023,
+      "workflows": {
+        "test-linux.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657943548",
+          "display_name": "Linux Tests"
+        },
+        "test-linux-llm.yml": {
+          "status": "skipped",
+          "conclusion": "skipped",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942983",
+          "display_name": "LLM Tests"
+        },
+        "test-linux-habitat.yml": {
+          "status": "skipped",
+          "conclusion": "skipped",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657943140",
+          "display_name": "Habitat Tests"
+        },
+        "test-linux-tutorials.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942729",
+          "display_name": "Tutorials Tests"
+        },
+        "test-linux-sota.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942728",
+          "display_name": "SOTA Tests"
+        },
+        "test-linux-libs.yml": {
+          "status": "skipped",
+          "conclusion": "skipped",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657943201",
+          "display_name": "Libs Tests"
+        },
+        "test-windows-optdepts.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942781",
+          "display_name": "Windows Tests"
+        },
+        "lint.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942803",
+          "display_name": "Lint"
+        },
+        "docs.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942790",
+          "display_name": "Documentation"
+        },
+        "benchmarks.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942792",
+          "display_name": "Benchmarks"
+        },
+        "validate-test-partitioning.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942804",
+          "display_name": "Test Partitioning"
+        },
+        "nightly_build.yml": {
+          "status": "skipped",
+          "conclusion": "skipped",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942928",
+          "display_name": "Nightly Build"
+        },
+        "build-wheels-linux.yml": {
+          "status": "cancelled",
+          "conclusion": "cancelled",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657943060",
+          "display_name": "Wheels (Linux)"
+        },
+        "build-wheels-m1.yml": {
+          "status": "success",
+          "conclusion": "success",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657943027",
+          "display_name": "Wheels (M1)"
+        },
+        "build-wheels-windows.yml": {
+          "status": "cancelled",
+          "conclusion": "cancelled",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942939",
+          "display_name": "Wheels (Windows)"
+        },
+        "build-wheels-aarch64-linux.yml": {
+          "status": "cancelled",
+          "conclusion": "cancelled",
+          "url": "https://github.com/PSXBRosa/rl/actions/runs/23889027023/job/69657942998",
+          "display_name": "Wheels (Aarch64)"
+        }
+      },
+      "summary": {
+        "total": 16,
+        "success": 9,
+        "failure": 0,
+        "skipped": 4,
+        "other": 3,
+        "success_rate": 75.0
+      }
+    },
     {
       "date": "2026-04-01",
       "orchestrator_ran": true,
