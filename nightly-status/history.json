@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-11T07:08:54.785247+00:00",
+  "last_updated": "2026-04-11T18:34:40.945503+00:00",
   "stats": {
     "last_7_days": {
       "days": 7,
@@ -22,7 +22,7 @@
     {
       "date": "2026-04-11",
       "orchestrator_ran": true,
-      "orchestrator_status": "pending",
+      "orchestrator_status": "queued",
       "orchestrator_url": "https://github.com/PSXBRosa/rl/actions/runs/24277319205",
       "orchestrator_run_id": 24277319205,
       "workflows": {
